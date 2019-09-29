@@ -10,6 +10,7 @@
 
 
 <!--정렬박스 시작-->
+<a type="button" class="btn btn-outline-info btn-sm" href="{% url 'new' %}">New</a>
 <div class = "btn-group float-right">
 <div class="d-flex">
     <div class="btn-group">
@@ -39,10 +40,77 @@
   <div class="card-body" style="border-top:0.5px solid lightgray">
     <p class="card-text">{{post.caption}}</p>
   </div>
+  {% if post.user == request.user %}
+   
+      <div class="btn-group float-right" style="margin: auto;">
+        <a href="{% url 'edit' post.id %}"><i class="far fa-edit" style="color: gray; font-size: 30px;"></i></a>
+      </div>
+      <div class="btn float-right" style="margin: auto;">
+        <a href="{% url 'delete' post.id %}"><i class="far fa-trash-alt" style="color: gray; font-size: 35px;" ></i></a>
+      </div>
+     
+  {% endif %}
   <div class="card-footer text-muted">
-    <p>{{post.like_count}}</p>
+      <button type="button" class="btn btn-outline-info btn-sm" data-toggle="modal" data-target="#post-{{ post.id }}">
+          댓글 보기
+        </button>
+        <form action="{% url 'like' post.id %}" method="post" class="float-right">
+          {% csrf_token %}
+          {% if post.id in liked_post %}
+          <button style="border: none; background-color: Transparent;" onclick="location.href='{{post_pk}}/like/'"><i
+              class="fas fa-heart fa-2x" style="color: pink;"></i></button>
+              {{ post.like_count }}
+          {% else %}
+          <button style="border: none; background-color: Transparent;" onclick="location.href='{{post_pk}}/like/'"><i
+              class="far fa-heart fa-2x" style="color: pink;"></i></button>
+              {{ post.like_count }}
+          {% endif %}
+        </form>
+      </div>
+    </div>
 </div>
-<!--post 추가 끝-->
+<!--post cnr-->
+
+<!-- 댓글 모달 시작 -->
+<div class="modal fade" id="post-{{ post.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">댓글</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          {% for comment in post.comment_set.all %}
+          <blockquote class="blockquote">
+            <img src="{{comment.user.profile.url}}" class = "profile" style="position: absolute;">
+            <div style="padding-left:50px;">
+              <p class="mb-0">{{ comment.content }}</p>
+              <footer class="blockquote-footer">{{ comment.user }}</footer>
+              <button type="submit" ><a href="{% url 'comment_edit' post.id %}">댓글 수정</a></button>
+              <button type="submit" ><a href="{% url 'comment_delete' post.id %}">댓글 삭제</a></button>
+            </div>
+            
+          </blockquote>
+          {% endfor %}
+        </div>
+        <div class="modal-footer" style="display: flex; justify-content: center;">
+          <form method='post' action="{% url 'create_comment' post.id %} ">
+            {%csrf_token%}
+            <div style="display: flex; flex-direction: column; ">
+              <textarea name="{{ comment_form.content.name }}" class="form-control" cols="50" placeholder="댓글을 남겨주세요~!"></textarea>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                <button type="submit"class="btn-primary">댓글 작성</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 댓글 모달 끝 -->
 
 <style>
   .profile{
